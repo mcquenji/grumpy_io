@@ -112,3 +112,8 @@ Package root exports:
 ## Status
 
 Current focus is V1 core IO and persistence surfaces. Process-management and system-information features remain out of scope for V1.
+
+
+### Safe file replacement
+
+Use `FileSystemService().replaceBytes(path, bytes)` when updating a document that must survive a failed write. The native implementation flushes a temporary file on the same filesystem, then renames it over the destination without deleting the previous file first. Temporary resources are cleaned up after success or failure. Unsupported backends return `IoErr.unsupported` without touching the destination; custom backends can override the same service contract.

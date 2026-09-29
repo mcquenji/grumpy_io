@@ -12,6 +12,29 @@ class DefaultFileSystemService extends FileSystemService {
   DefaultFileSystemService() : super.internal();
 
   @override
+  Future<IoResult<void>> replaceBytes(IoPath file, Bytes bytes) async {
+    Directory? temporary;
+    try {
+      final target = File(file.value);
+      await target.parent.create(recursive: true);
+      temporary = await target.parent.createTemp('.grumpy-replace-');
+      final staged = File('${temporary.path}/value');
+      await staged.writeAsBytes(bytes, flush: true);
+      // File.rename replaces files without first removing the destination.
+      await staged.rename(target.path);
+      return const IoOk(null);
+    } catch (error, stack) {
+      return IoErr(_mapError(error, stack));
+    } finally {
+      if (temporary != null) {
+        try {
+          await temporary.delete(recursive: true);
+        } catch (_) {}
+      }
+    }
+  }
+
+  @override
   Future<IoResult<bool>> exists(IoPath path) async {
     try {
       final entityType = await FileSystemEntity.type(path.value);

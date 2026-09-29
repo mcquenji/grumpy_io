@@ -29,6 +29,13 @@ abstract class FileSystemService extends Service {
     bool createParents = true,
   });
 
+  /// Safely replaces [file] with [bytes], preserving it if replacement fails.
+  ///
+  /// Backends without safe replacement return unsupported without writing.
+  /// Native implementations use a flushed sibling temporary file and rename.
+  Future<IoResult<void>> replaceBytes(IoPath file, Bytes bytes) async =>
+      const IoErr.unsupported('safe file replacement');
+
   /// Creates [directory].
   Future<IoResult<void>> createDirectory(
     IoPath directory, {
